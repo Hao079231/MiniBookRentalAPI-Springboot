@@ -33,6 +33,8 @@ public class PermissionCriteria implements Serializable {
           predicates.add(cb.like(root.get("pCode"), "%" + getPCode() + "%"));
         }
 
+        query.orderBy(cb.desc(root.get("createdDate")));
+
         return cb.and(predicates.toArray(new Predicate[predicates.size()]));
       }
     };
