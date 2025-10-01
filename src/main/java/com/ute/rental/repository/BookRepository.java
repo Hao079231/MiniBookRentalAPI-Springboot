@@ -15,6 +15,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
   boolean existsByTitleAndAuthor(String title, String author);
 
   @Modifying
-  @Query("UPDATE Book b SET b.categoryId = NULL WHERE b.categoryId = :categoryId")
+  @Query("UPDATE Book b SET b.category = NULL WHERE b.category.id = :categoryId")
   void removeCategoryId(@Param("categoryId") Long categoryId);
 }

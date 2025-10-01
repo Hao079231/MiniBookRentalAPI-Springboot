@@ -41,4 +41,12 @@ public class ErrorCode {
    * */
   public static final String BOOK_ERROR_NOT_FOUND = "ERROR-BOOK-0000";
   public static final String BOOK_ERROR_EXIST = "ERROR-BOOK-0001";
+
+  /**
+   * Starting error code reader
+   * */
+  public static final String READER_ERROR_NOT_FOUND = "ERROR-READER-0000";
+  public static final String READER_ERROR_EXIST = "ERROR-READER-0001";
+  public static final String READER_ERROR_BLOCKED = "ERROR-READER-0002";
+  public static final String READER_ERROR_ACTIVED = "ERROR-READER-0003";
 }

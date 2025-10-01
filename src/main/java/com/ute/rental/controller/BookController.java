@@ -10,8 +10,10 @@ import com.ute.rental.form.book.CreateBookForm;
 import com.ute.rental.form.book.UpdateBookForm;
 import com.ute.rental.mapper.BookMapper;
 import com.ute.rental.model.Book;
+import com.ute.rental.model.Category;
 import com.ute.rental.model.criteria.BookCriteria;
 import com.ute.rental.repository.BookRepository;
+import com.ute.rental.repository.CategoryRepository;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +45,9 @@ public class BookController {
   @Autowired
   BookMapper bookMapper;
 
+  @Autowired
+  CategoryRepository categoryRepository;
+
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('BO_C')")
   public ApiMessageDto<String> create(@Valid @RequestBody CreateBookForm request, BindingResult bindingResult){
@@ -51,7 +56,10 @@ public class BookController {
     if (book != null){
       throw new BadRequestException("Book already exist", ErrorCode.BOOK_ERROR_EXIST);
     }
+    Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(()
+    -> new NotFoundException("Category not found", ErrorCode.CATEGORY_ERROR_NOT_FOUND));
     book = bookMapper.fromCreateBookFormToEntity(request);
+    book.setCategory(category);
     bookRepository.save(book);
     apiMessageDto.setMessage("Create book success");
     return apiMessageDto;
@@ -93,7 +101,10 @@ public class BookController {
         throw new BadRequestException("Book already exist", ErrorCode.BOOK_ERROR_EXIST);
       }
     }
+    Category category = categoryRepository.findById(request.getCategoryId()).orElseThrow(()
+    -> new NotFoundException("Category not found", ErrorCode.CATEGORY_ERROR_NOT_FOUND));
     bookMapper.fromUpdateBookFormToEntity(request, book);
+    book.setCategory(category);
     bookRepository.save(book);
     apiMessageDto.setMessage("Update book success");
     return apiMessageDto;

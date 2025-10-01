@@ -9,4 +9,6 @@ public class MiniBookConstant {
   public static final String PASSWORD_PATTERN = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
   public static final String PHONE_PATTERN = "^0\\d{9}$";
 
+  public static final Integer READER_STATUS_ACTIVE = 1;
+  public static final Integer READER_STATUS_BLOCK = -1;
 }
