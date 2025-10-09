@@ -97,13 +97,13 @@ public class ReaderController extends ABasicController{
     Reader reader = readerRepository.findById(request.getId()).orElseThrow(()
     -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
     if (!Objects.equals(reader.getEmail(), request.getEmail())){
-      if (readerRepository.existsByEmail(reader.getEmail())){
+      if (readerRepository.existsByEmail(request.getEmail())){
         throw new BadRequestException("Email already exist", ErrorCode.READER_ERROR_EXIST);
       }
     }
 
     if (!Objects.equals(reader.getPhone(), request.getPhone())){
-      if (readerRepository.existsByPhone(reader.getPhone())){
+      if (readerRepository.existsByPhone(request.getPhone())){
         throw new BadRequestException("Phone already exist", ErrorCode.READER_ERROR_EXIST);
       }
     }
@@ -144,6 +144,7 @@ public class ReaderController extends ABasicController{
       throw new BadRequestException("Reader is active", ErrorCode.READER_ERROR_ACTIVED);
     }
     reader.setStatus(MiniBookConstant.READER_STATUS_ACTIVE);
+    readerRepository.save(reader);
     apiMessageDto.setMessage("Unblock success");
     return apiMessageDto;
   }
