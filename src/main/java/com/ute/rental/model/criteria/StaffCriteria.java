@@ -37,7 +37,7 @@ public class StaffCriteria implements Serializable {
         }
 
         if (StringUtils.isNotBlank(getPhone())) {
-          predicates.add(cb.like(cb.lower(root.get("phone")), "%" + getPhone().toLowerCase() + "%"));
+          predicates.add(cb.like(root.get("phone"), "%" + getPhone() + "%"));
         }
 
 

@@ -49,4 +49,10 @@ public class ErrorCode {
   public static final String READER_ERROR_EXIST = "ERROR-READER-0001";
   public static final String READER_ERROR_BLOCKED = "ERROR-READER-0002";
   public static final String READER_ERROR_ACTIVED = "ERROR-READER-0003";
+
+  /**
+   * Starting error code rental transaction
+   * */
+  public static final String RENTAL_TRANSACTION_ERROR_NOT_FOUND = "ERROR-RENTAL-TRANSACTION-0000";
+  public static final String RENTAL_TRANSACTION_ERROR_EXIST = "ERROR-RENTAL-TRANSACTION-0001";
 }

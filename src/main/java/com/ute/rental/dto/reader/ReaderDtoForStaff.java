@@ -1,6 +1,5 @@
 package com.ute.rental.dto.reader;
 
-import com.ute.rental.dto.AbasicDto;
 import lombok.Data;
 
 @Data

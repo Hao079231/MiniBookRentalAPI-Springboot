@@ -11,4 +11,8 @@ public class MiniBookConstant {
 
   public static final Integer READER_STATUS_ACTIVE = 1;
   public static final Integer READER_STATUS_BLOCK = -1;
+
+  public static final Integer RENTAL_STATE_RENTING = 1;
+  public static final Integer RENTAL_STATE_COMPLETE = 2;
+  public static final Integer RENTAL_STATE_OVERDUE = 3;
 }
