@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,26 +15,22 @@ import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "db_rental_transaction")
+@Table(name = "db_rental_detail")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class RentalTransaction extends Auditable{
+public class RentalDetail {
   @Id
   @GenericGenerator(name = "idGenerator", strategy = "com.ute.rental.service.id.idGenerator")
   @GeneratedValue(generator = "idGenerator")
   private Long id;
   @ManyToOne
-  @JoinColumn(name = "staff_id")
-  private Account staff;
+  @JoinColumn(name = "rental_transaction_id")
+  private RentalTransaction rentalTransaction;
   @ManyToOne
-  @JoinColumn(name = "reader_id")
-  private Reader reader;
-  private Float depositTotal = 0F;
-  private Float refundAmountTotal = 0F;
-  private Integer totalBorrowed = 0;
-  private Date dueDate;
-  private Integer state; // 1 - renting, 2 - complete, 3 - overdue
+  @JoinColumn(name = "book_id")
+  private Book book;
+  private Float refundAmount = 0F;
 }
