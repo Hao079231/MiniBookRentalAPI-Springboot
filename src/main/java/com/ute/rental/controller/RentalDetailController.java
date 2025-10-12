@@ -1,5 +1,6 @@
 package com.ute.rental.controller;
 
+import com.ute.rental.constant.MiniBookConstant;
 import com.ute.rental.dto.ApiMessageDto;
 import com.ute.rental.dto.ErrorCode;
 import com.ute.rental.dto.ResponseListDto;
@@ -66,6 +67,9 @@ public class RentalDetailController extends ABasicController{
     if (rentalTransaction.getTotalBorrowed() > 3){
       throw new BadRequestException("Borrowed 3 books", ErrorCode.RENTAL_TRANSACTION_ERROR_BORROW);
     }
+    if (!Objects.equals(rentalTransaction.getState(), MiniBookConstant.RENTAL_STATE_RENTING)){
+      throw new BadRequestException("Cannot add if the state of the rental transaction is not renting", ErrorCode.RENTAL_TRANSACTION_ERROR_STATE_NOT_RENTING);
+    }
     RentalDetail rentalDetail = new RentalDetail();
     rentalDetail.setBook(book);
     rentalDetail.setRentalTransaction(rentalTransaction);
@@ -109,6 +113,9 @@ public class RentalDetailController extends ABasicController{
     -> new NotFoundException("Rental detail not found", ErrorCode.RENTAL_DETAIL_NOT_FOUND));
     RentalTransaction rentalTransaction = rentalTransactionRepository.findById(request.getRentalTransactionId()).orElseThrow(()
         -> new NotFoundException("Rental transaction not found", ErrorCode.RENTAL_TRANSACTION_ERROR_NOT_FOUND));
+    if (!Objects.equals(rentalTransaction.getState(), MiniBookConstant.RENTAL_STATE_RENTING)){
+      throw new BadRequestException("Cannot add if the state of the rental transaction is not renting", ErrorCode.RENTAL_TRANSACTION_ERROR_STATE_NOT_RENTING);
+    }
     Book book = bookRepository.findById(request.getId()).orElseThrow(()
     -> new NotFoundException("Book not found", ErrorCode.BOOK_ERROR_NOT_FOUND));
     // Cập nhật thông tin của book cũ và book mới khi mà rental detail đổi id book
@@ -131,6 +138,9 @@ public class RentalDetailController extends ABasicController{
       flag = true;
       RentalTransaction oldRentalTransaction = rentalTransactionRepository.findById(rentalDetail.getRentalTransaction().getId()).orElseThrow(()
       -> new NotFoundException("Rental transaction not found", ErrorCode.RENTAL_TRANSACTION_ERROR_NOT_FOUND));
+      if (!Objects.equals(oldRentalTransaction.getState(), MiniBookConstant.RENTAL_STATE_RENTING)){
+        throw new BadRequestException("Cannot add if the state of the rental transaction is not renting", ErrorCode.RENTAL_TRANSACTION_ERROR_STATE_NOT_RENTING);
+      }
       oldRentalTransaction.setDepositTotal(oldRentalTransaction.getDepositTotal() - rentalDetail.getBook().getPrice());
       oldRentalTransaction.setRefundAmountTotal(oldRentalTransaction.getRefundAmountTotal() - rentalDetail.getRefundAmount());
       oldRentalTransaction.setTotalBorrowed(oldRentalTransaction.getTotalBorrowed() - 1);

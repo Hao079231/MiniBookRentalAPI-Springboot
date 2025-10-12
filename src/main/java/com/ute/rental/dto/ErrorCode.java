@@ -57,6 +57,7 @@ public class ErrorCode {
   public static final String RENTAL_TRANSACTION_ERROR_NOT_FOUND = "ERROR-RENTAL-TRANSACTION-0000";
   public static final String RENTAL_TRANSACTION_ERROR_EXIST = "ERROR-RENTAL-TRANSACTION-0001";
   public static final String RENTAL_TRANSACTION_ERROR_BORROW = "ERROR-RENTAL-TRANSACTION-0002";
+  public static final String RENTAL_TRANSACTION_ERROR_STATE_NOT_RENTING = "ERROR-RENTAL-TRANSACTION-0003";
 
   /**
    * Starting error code rental detail

@@ -19,6 +19,7 @@ public class RentalTransactionCriteria implements Serializable {
   private static final long serialVerionUID = 1L;
   private String readerName;
   private String phone;
+  private Integer state;
 
   public Specification<RentalTransaction> getSpecification(){
     return new Specification<RentalTransaction>() {
@@ -35,6 +36,9 @@ public class RentalTransactionCriteria implements Serializable {
         if (StringUtils.isNotBlank(getPhone())) {
           Join<RentalTransaction, Reader> readerJoin = root.join("reader");
           predicates.add(cb.like(readerJoin.get("phone"), "%" + getPhone() + "%"));
+        }
+        if (getState() != null) { // 🔹 thêm điều kiện lọc theo state
+          predicates.add(cb.equal(root.get("state"), getState()));
         }
         return cb.and(predicates.toArray(new Predicate[predicates.size()]));
       }

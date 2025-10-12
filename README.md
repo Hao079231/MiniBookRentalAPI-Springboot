@@ -19,7 +19,7 @@ Chạy ứng dụng từ thư mục gốc dự án:
 mvn spring-boot:run
 ```
 
-Ứng dụng mặc định chạy trên cổng 8080 (xem `src/main/resources/application.properties`).
+Ứng dụng mặc định chạy trên cổng 8383
 
 ## Cấu hình
 Các file cấu hình:
@@ -37,11 +37,6 @@ Sau khi có token, gửi header Authorization cho các request cần xác thực
 
 ```
 Authorization: Bearer <token>
-```
-
-Ví dụ lấy token (PowerShell/curl):
-```powershell
-curl -X POST http://localhost:8080/api/token -H "Content-Type: application/json" -d '{"grantType":"admin","username":"admin","password":"Password123!"}'
 ```
 
 ## Định dạng phản hồi chung
@@ -88,7 +83,22 @@ Rental Transaction (`RentalTransactionController`)
 - PUT  /v1/rental-transaction/update
 - PUT  /v1/rental-transaction/complete
 
-Các controller khác: `StaffController`, `GroupController`, `PermissionController` — xem trực tiếp file controller để biết chi tiết.
+Staff (`StaffController`)
+- POST   /v1/staff/create
+- GET    /v1/staff/list
+- GET    /v1/staff/get/{id}
+- PUT    /v1/staff/update
+- DELETE /v1/staff/delete/{id}
+- GET    /v1/staff/profile
+- PUT    /v1/staff/client-update
+
+Các controller khác: `GroupController`, `PermissionController` — xem trực tiếp file controller để biết chi tiết.
+
+Rental Detail (`RentalDetailController`)
+- POST   /v1/rental-detail/create
+- GET    /v1/rental-detail/list
+- PUT    /v1/rental-detail/update
+- DELETE /v1/rental-detail/delete/{id}
 
 ## DTO và Form chính
 Các lớp request/response chính:
@@ -101,3 +111,14 @@ Mã lỗi được định nghĩa trong `ErrorCode` và ngoại lệ được x�
 ## Ghi chú phát triển
 - Entry point ứng dụng: `MiniBookRentalApplication` (`src/main/java/com/ute/rental/MiniBookRentalApplication.java`).
 - Cấu hình bảo mật & JWT: `SecurityConfig`, `ResourceConfig`, `CustomJwtDecoder` (thư mục `config`).
+
+## Dịch vụ tự động cập nhật trạng thái overdue (hàng ngày)
+Ứng dụng nên (hoặc đã) có một service chạy định kỳ để cập nhật trạng thái của `RentalTransaction` thành "overdue" (giá trị state = 3) khi giao dịch đã được tạo quá 14 ngày.
+
+Mô tả quy tắc:
+- Kiểm tra tất cả bản ghi `RentalTransaction` có `state = 1` (renting).
+- Nếu (ngày hiện tại - `createdDate`) > 14 ngày thì cập nhật `state` = 3 (overdue).
+- Cập nhật sẽ kèm theo log trong server.
+
+Lịch chạy:
+- Thực hiện vào mỗi 00:00 (giờ server) hàng ngày.
