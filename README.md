@@ -92,13 +92,13 @@ Staff (`StaffController`)
 - GET    /v1/staff/profile
 - PUT    /v1/staff/client-update
 
-Các controller khác: `GroupController`, `PermissionController` — xem trực tiếp file controller để biết chi tiết.
-
 Rental Detail (`RentalDetailController`)
 - POST   /v1/rental-detail/create
 - GET    /v1/rental-detail/list
 - PUT    /v1/rental-detail/update
 - DELETE /v1/rental-detail/delete/{id}
+
+Các controller khác: `GroupController`, `PermissionController` — xem trực tiếp file controller để biết chi tiết.
 
 ## DTO và Form chính
 Các lớp request/response chính:
