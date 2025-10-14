@@ -21,7 +21,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class RentalDetail {
+public class RentalDetail extends Auditable{
   @Id
   @GenericGenerator(name = "idGenerator", strategy = "com.ute.rental.service.id.idGenerator")
   @GeneratedValue(generator = "idGenerator")
