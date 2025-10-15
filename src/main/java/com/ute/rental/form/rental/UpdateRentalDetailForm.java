@@ -16,4 +16,7 @@ public class UpdateRentalDetailForm {
   @NotNull(message = "bookId cannot be null")
   @Schema(name = "bookId")
   private Long bookId;
+  @NotNull(message = "bookCount cannot be null")
+  @Schema(name = "bookCount")
+  private Integer bookCount;
 }

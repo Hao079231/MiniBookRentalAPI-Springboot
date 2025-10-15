@@ -7,7 +7,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import jakarta.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 public class RentalTransactionCriteria implements Serializable {
   private static final long serialVerionUID = 1L;
   private String readerName;
-  @NotEmpty(message = "phone is required")
   private String phone;
   private Integer state;
 
@@ -39,7 +37,7 @@ public class RentalTransactionCriteria implements Serializable {
           Join<RentalTransaction, Reader> readerJoin = root.join("reader");
           predicates.add(cb.like(readerJoin.get("phone"), "%" + getPhone() + "%"));
         }
-        if (getState() != null) { // thêm điều kiện lọc theo state
+        if (getState() != null) {
           predicates.add(cb.equal(root.get("state"), getState()));
         }
         query.orderBy(cb.desc(root.get("createdDate")));

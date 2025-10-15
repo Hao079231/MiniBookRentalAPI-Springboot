@@ -1,5 +1,6 @@
 package com.ute.rental.controller;
 
+import com.ute.rental.constant.MiniBookConstant;
 import com.ute.rental.dto.ApiMessageDto;
 import com.ute.rental.dto.ErrorCode;
 import com.ute.rental.dto.ResponseListDto;
@@ -11,9 +12,11 @@ import com.ute.rental.form.book.UpdateBookForm;
 import com.ute.rental.mapper.BookMapper;
 import com.ute.rental.model.Book;
 import com.ute.rental.model.Category;
+import com.ute.rental.model.RentalDetail;
 import com.ute.rental.model.criteria.BookCriteria;
 import com.ute.rental.repository.BookRepository;
 import com.ute.rental.repository.CategoryRepository;
+import com.ute.rental.repository.RentalDetailRepository;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
@@ -47,6 +50,9 @@ public class BookController {
 
   @Autowired
   CategoryRepository categoryRepository;
+
+  @Autowired
+  RentalDetailRepository rentalDetailRepository;
 
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('BO_C')")
@@ -112,10 +118,27 @@ public class BookController {
 
   @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('BO_D')")
-  public ApiMessageDto<String> delete(@PathVariable("id") Long id){
+  public ApiMessageDto<String> delete(@PathVariable("id") Long id) {
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    Book book = bookRepository.findById(id).orElseThrow(()
-    -> new NotFoundException("Book not found", ErrorCode.BOOK_ERROR_NOT_FOUND));
+    Book book = bookRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Book not found", ErrorCode.BOOK_ERROR_NOT_FOUND));
+
+    // Lấy toàn bộ rental detail chứa sách này
+    List<RentalDetail> rentalDetails = rentalDetailRepository.findByBookId(id);
+
+    // Kiểm tra nếu có rental transaction đang thuê (state = 1)
+    boolean hasActiveRent = rentalDetails.stream()
+        .anyMatch(rd -> rd.getRentalTransaction() != null && rd.getRentalTransaction().getState() == 1);
+
+    if (hasActiveRent) {
+      throw new BadRequestException("Cannot delete book with state renting", ErrorCode.BOOK_ERROR_CANNOT_DELETE);
+    }
+
+    // Nếu không có state renting, set book = null trong tất cả rental detail
+    for (RentalDetail rd : rentalDetails) {
+      rd.setBook(null);
+    }
+    rentalDetailRepository.saveAll(rentalDetails);
     bookRepository.delete(book);
     apiMessageDto.setMessage("Delete book success");
     return apiMessageDto;

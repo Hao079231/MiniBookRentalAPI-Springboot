@@ -33,4 +33,5 @@ public class RentalDetail extends Auditable{
   @JoinColumn(name = "book_id")
   private Book book;
   private Float refundAmount = 0F;
+  private Integer bookCount = 0;
 }

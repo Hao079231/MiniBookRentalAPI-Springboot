@@ -41,6 +41,7 @@ public class ErrorCode {
    * */
   public static final String BOOK_ERROR_NOT_FOUND = "ERROR-BOOK-0000";
   public static final String BOOK_ERROR_EXIST = "ERROR-BOOK-0001";
+  public static final String BOOK_ERROR_CANNOT_DELETE = "ERROR-BOOK-0002";
   public static final String BOOK_ERROR_OUT_OF_STOCK = "ERROR-BOOK-0003";
 
   /**
@@ -62,5 +63,8 @@ public class ErrorCode {
   /**
    * Starting error code rental detail
    * */
-  public static final String RENTAL_DETAIL_NOT_FOUND = "ERROR-RENTAL-DETAIL-0000";
+  public static final String RENTAL_DETAIL_ERROR_NOT_FOUND = "ERROR-RENTAL-DETAIL-0000";
+  public static final String RENTAL_DETAIL_ERROR_EXIST = "ERROR-RENTAL-DETAIL-0001";
+  public static final String RENTAL_DETAIL_ERROR_NOT_CREATE = "ERROR-RENTAL-DETAIL-0002";
+  public static final String RENTAL_TRANSACTION_ERROR_BORROW_LIMIT = "ERROR-RENTAL-DETAIL-0003";
 }
