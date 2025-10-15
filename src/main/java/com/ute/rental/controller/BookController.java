@@ -13,10 +13,13 @@ import com.ute.rental.mapper.BookMapper;
 import com.ute.rental.model.Book;
 import com.ute.rental.model.Category;
 import com.ute.rental.model.RentalDetail;
+import com.ute.rental.model.RentalTransaction;
 import com.ute.rental.model.criteria.BookCriteria;
 import com.ute.rental.repository.BookRepository;
 import com.ute.rental.repository.CategoryRepository;
 import com.ute.rental.repository.RentalDetailRepository;
+import com.ute.rental.repository.RentalTransactionRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +56,9 @@ public class BookController {
 
   @Autowired
   RentalDetailRepository rentalDetailRepository;
+
+  @Autowired
+  RentalTransactionRepository rentalTransactionRepository;
 
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('BO_C')")
@@ -118,15 +124,22 @@ public class BookController {
 
   @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('BO_D')")
+  @Transactional
   public ApiMessageDto<String> delete(@PathVariable("id") Long id) {
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Book book = bookRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Book not found", ErrorCode.BOOK_ERROR_NOT_FOUND));
 
-    // Lấy toàn bộ rental detail chứa sách này
+    // Lấy toàn bộ rentalDetail có bookId tương ứng
     List<RentalDetail> rentalDetails = rentalDetailRepository.findByBookId(id);
+    if (rentalDetails.isEmpty()) {
+      // Không có liên kết, xóa trực tiếp
+      bookRepository.delete(book);
+      apiMessageDto.setMessage("Delete book success");
+      return apiMessageDto;
+    }
 
-    // Kiểm tra nếu có rental transaction đang thuê (state = 1)
+    // Kiểm tra có rentalTransaction nào đang ở trạng thái 'renting' (1) không
     boolean hasActiveRent = rentalDetails.stream()
         .anyMatch(rd -> rd.getRentalTransaction() != null && rd.getRentalTransaction().getState() == 1);
 
@@ -134,13 +147,27 @@ public class BookController {
       throw new BadRequestException("Cannot delete book with state renting", ErrorCode.BOOK_ERROR_CANNOT_DELETE);
     }
 
-    // Nếu không có state renting, set book = null trong tất cả rental detail
+    // Nếu không có transaction renting → xử lý cập nhật thông tin transaction trước khi xóa
     for (RentalDetail rd : rentalDetails) {
-      rd.setBook(null);
+      RentalTransaction transaction = rd.getRentalTransaction();
+      if (transaction != null) {
+        Float bookPrice = book.getPrice() != null ? book.getPrice() : 0F;
+        Float refundAmount = rd.getRefundAmount() != null ? rd.getRefundAmount() : 0F;
+        Integer bookCount = rd.getBookCount() != null ? rd.getBookCount() : 0;
+
+        // Cập nhật lại thông tin trong rental transaction
+        transaction.setDepositTotal(transaction.getDepositTotal() - (bookPrice * bookCount));
+        transaction.setRefundAmountTotal(transaction.getRefundAmountTotal() - refundAmount);
+        transaction.setTotalBorrowed(transaction.getTotalBorrowed() - bookCount);
+
+        rentalTransactionRepository.save(transaction);
+      }
     }
-    rentalDetailRepository.saveAll(rentalDetails);
+
+    rentalDetailRepository.deleteAllByBookId(id);
     bookRepository.delete(book);
     apiMessageDto.setMessage("Delete book success");
     return apiMessageDto;
   }
+
 }
