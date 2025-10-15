@@ -141,7 +141,7 @@ public class BookController {
 
     // Kiểm tra có rentalTransaction nào đang ở trạng thái 'renting' (1) không
     boolean hasActiveRent = rentalDetails.stream()
-        .anyMatch(rd -> rd.getRentalTransaction() != null && rd.getRentalTransaction().getState() == 1);
+        .anyMatch(rd -> rd.getRentalTransaction() != null && Objects.equals(rd.getRentalTransaction().getState(), MiniBookConstant.RENTAL_STATE_RENTING)) ;
 
     if (hasActiveRent) {
       throw new BadRequestException("Cannot delete book with state renting", ErrorCode.BOOK_ERROR_CANNOT_DELETE);

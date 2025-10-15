@@ -9,4 +9,5 @@ public class RentalDetailDto {
   private RentalTransactionDisplayDto rentalTransaction;
   private BookDto book;
   private Float refundAmount;
+  private Integer bookCount;
 }

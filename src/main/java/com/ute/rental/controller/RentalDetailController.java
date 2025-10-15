@@ -13,6 +13,7 @@ import com.ute.rental.mapper.RentalDetailMapper;
 import com.ute.rental.model.Book;
 import com.ute.rental.model.RentalDetail;
 import com.ute.rental.model.RentalTransaction;
+import com.ute.rental.model.criteria.RentalDetailCriteria;
 import com.ute.rental.repository.BookRepository;
 import com.ute.rental.repository.RentalDetailRepository;
 import com.ute.rental.repository.RentalTransactionRepository;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -101,10 +103,10 @@ public class RentalDetailController extends ABasicController{
 
   @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('RD_L')")
-  public ApiMessageDto<ResponseListDto<List<RentalDetailDto>>> getList(){
+  public ApiMessageDto<ResponseListDto<List<RentalDetailDto>>> getList(RentalDetailCriteria criteria, Pageable pageable){
     ApiMessageDto<ResponseListDto<List<RentalDetailDto>>> apiMessageDto = new ApiMessageDto<>();
     ResponseListDto<List<RentalDetailDto>> responseListDto = new ResponseListDto<>();
-    Page<RentalDetail> rentalDetails = rentalDetailRepository.findAll(PageRequest.of(0, 10));
+    Page<RentalDetail> rentalDetails = rentalDetailRepository.findAll(criteria.getSpecification(), pageable);
     responseListDto.setContent(rentalDetailMapper.fromEntityToRentalDetailDtoList(rentalDetails.getContent()));
     responseListDto.setTotalElement(rentalDetails.getTotalElements());
     responseListDto.setTotalPage(rentalDetails.getTotalPages());

@@ -19,6 +19,7 @@ public interface RentalDetailMapper {
   @Mapping(source = "rentalTransaction", target = "rentalTransaction", qualifiedByName = "fromEntityToRentalDisplayDto")
   @Mapping(source = "book", target = "book", qualifiedByName = "fromEntityToBookDto")
   @Mapping(source = "refundAmount", target = "refundAmount")
+  @Mapping(source = "bookCount", target = "bookCount")
   @BeanMapping(ignoreByDefault = true)
   @Named("fromEntityToRentalDetailDto")
   RentalDetailDto fromEntityToRentalDetailDto(RentalDetail rentalDetail);
