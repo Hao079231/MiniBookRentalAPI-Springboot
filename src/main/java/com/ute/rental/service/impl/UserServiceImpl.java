@@ -79,7 +79,7 @@ public class UserServiceImpl{
   public ApiMessageDto<AuthenticationDto> authenticate(AuthenticationForm request) {
     ApiMessageDto<AuthenticationDto> apiMessageDto = new ApiMessageDto<>();
     AuthenticationDto authenticationDto = new AuthenticationDto();
-    if (Objects.equals(request.getGrantType(), SecurityConstant.ADMIN)){
+    if (Objects.equals(request.getGrantType().toLowerCase(), SecurityConstant.ADMIN)){
       if (StringUtils.isBlank(request.getUsername())){
         throw new BadRequestException("Username cannot be null", ErrorCode.ACCOUNT_ERROR_USERNAME_NULL);
       }
@@ -93,7 +93,7 @@ public class UserServiceImpl{
         throw new BadRequestException("Password invalid", ErrorCode.ACCOUNT_ERROR_PASSWORD);
       }
       authenticationDto.setToken(generateToken(account));
-    } else if (Objects.equals(request.getGrantType(), SecurityConstant.STAFF)){
+    } else if (Objects.equals(request.getGrantType().toLowerCase(), SecurityConstant.STAFF)){
       if (StringUtils.isBlank(request.getEmail())){
         throw new BadRequestException("Email cannot be null", ErrorCode.ACCOUNT_ERROR_EMAIL_NULL);
       }
