@@ -8,6 +8,8 @@ public class ErrorCode {
   public static final String ACCOUNT_ERROR_EXIST = "ERROR-ACCOUNT-0001";
   public static final String ACCOUNT_ERROR_PASSWORD = "ERROR-ACCOUNT-0002";
   public static final String ACCOUNT_ERROR_UNAUTHORIZE = "ERROR-ACCOUNT-0003";
+  public static final String ACCOUNT_ERROR_USERNAME_NULL = "ERROR-ACCOUNT-0004";
+  public static final String ACCOUNT_ERROR_EMAIL_NULL = "ERROR-ACCOUNT-0005";
   /**
    * Starting error code database
    * */

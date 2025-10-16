@@ -81,9 +81,7 @@ public class UserServiceImpl{
     AuthenticationDto authenticationDto = new AuthenticationDto();
     if (Objects.equals(request.getGrantType(), SecurityConstant.ADMIN)){
       if (StringUtils.isBlank(request.getUsername())){
-        apiMessageDto.setResult(false);
-        apiMessageDto.setMessage("Username cannot be null");
-        return apiMessageDto;
+        throw new BadRequestException("Username cannot be null", ErrorCode.ACCOUNT_ERROR_USERNAME_NULL);
       }
       Account account = accountRepository.findByUsername(request.getUsername()).orElseThrow(()
           -> new NotFoundException("Account not found", ErrorCode.ACCOUNT_ERROR_NOT_FOUND));
@@ -97,9 +95,7 @@ public class UserServiceImpl{
       authenticationDto.setToken(generateToken(account));
     } else if (Objects.equals(request.getGrantType(), SecurityConstant.STAFF)){
       if (StringUtils.isBlank(request.getEmail())){
-        apiMessageDto.setResult(false);
-        apiMessageDto.setMessage("Email cannot be null");
-        return apiMessageDto;
+        throw new BadRequestException("Email cannot be null", ErrorCode.ACCOUNT_ERROR_EMAIL_NULL);
       }
       Account account = accountRepository.findByEmail(request.getEmail()).orElseThrow(()
           -> new NotFoundException("Account not found", ErrorCode.ACCOUNT_ERROR_NOT_FOUND));
@@ -111,6 +107,8 @@ public class UserServiceImpl{
         throw new BadRequestException("Password invalid", ErrorCode.ACCOUNT_ERROR_PASSWORD);
       }
       authenticationDto.setToken(generateToken(account));
+    } else {
+      throw new BadRequestException("Invalid grant type");
     }
     apiMessageDto.setData(authenticationDto);
     apiMessageDto.setMessage("Login success");
