@@ -1,8 +1,12 @@
 package com.ute.rental.service;
 
 import com.ute.rental.constant.MiniBookConstant;
+import com.ute.rental.dto.ErrorCode;
+import com.ute.rental.exception.NotFoundException;
+import com.ute.rental.model.Reader;
 import com.ute.rental.model.RentalTransaction;
 import com.ute.rental.model.criteria.RentalTransactionCriteria;
+import com.ute.rental.repository.ReaderRepository;
 import com.ute.rental.repository.RentalTransactionRepository;
 import jakarta.transaction.Transactional;
 import java.util.Date;
@@ -17,6 +21,9 @@ import org.springframework.stereotype.Service;
 public class RentalTransactionService {
   @Autowired
   RentalTransactionRepository rentalTransactionRepository;
+
+  @Autowired
+  ReaderRepository readerRepository;
 
 //  @Scheduled(cron = "*/10 * * * * *") // chạy mỗi 10 giây để test nhanh
   @Scheduled(cron = "0 0 0 * * *") //Chạy mỗi ngày lúc 00:00
@@ -40,6 +47,10 @@ public class RentalTransactionService {
 //        if (diffInSeconds > 30) {
 //          rt.setState(MiniBookConstant.RENTAL_STATE_OVERDUE);
 //          rentalTransactionRepository.save(rt);
+//        Reader reader = readerRepository.findById(rt.getReader().getId()).orElseThrow(()
+//            -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
+//        reader.setStatus(MiniBookConstant.READER_STATUS_BLOCK);
+//        readerRepository.save(reader);
 //          updatedCount++;
 //        }
 
@@ -47,6 +58,10 @@ public class RentalTransactionService {
         if (diffInDays > 14) {
           rt.setState(MiniBookConstant.RENTAL_STATE_OVERDUE);
           rentalTransactionRepository.save(rt);
+          Reader reader = readerRepository.findById(rt.getReader().getId()).orElseThrow(()
+          -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
+          reader.setStatus(MiniBookConstant.READER_STATUS_BLOCK);
+          readerRepository.save(reader);
           updatedCount++;
         }
       }
