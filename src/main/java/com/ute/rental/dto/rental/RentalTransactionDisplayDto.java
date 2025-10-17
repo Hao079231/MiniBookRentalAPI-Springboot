@@ -16,4 +16,5 @@ public class RentalTransactionDisplayDto {
   private Date dueDate;
   private Integer state;
   private Long daysBorrowed;
+  private Date createdDate;
 }
