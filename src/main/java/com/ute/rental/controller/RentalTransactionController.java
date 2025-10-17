@@ -85,13 +85,35 @@ public class RentalTransactionController extends ABasicController{
   @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('RT_L')")
   public ApiMessageDto<ResponseListDto<List<RentalTransactionDisplayDto>>> getList(
-      RentalTransactionCriteria criteria, Pageable pageable){
+      RentalTransactionCriteria criteria, Pageable pageable) {
+
     ApiMessageDto<ResponseListDto<List<RentalTransactionDisplayDto>>> apiMessageDto = new ApiMessageDto<>();
     ResponseListDto<List<RentalTransactionDisplayDto>> responseListDto = new ResponseListDto<>();
-    Page<RentalTransaction> rentalTransactions = rentalTransactionRepository.findAll(criteria.getSpecification(), pageable);
-    responseListDto.setContent(rentalTransactionMapper.fromEntityToRentalDisplayDtoList(rentalTransactions.getContent()));
+
+    Page<RentalTransaction> rentalTransactions =
+        rentalTransactionRepository.findAll(criteria.getSpecification(), pageable);
+
+    List<RentalTransactionDisplayDto> dtoList =
+        rentalTransactionMapper.fromEntityToRentalDisplayDtoList(rentalTransactions.getContent());
+
+    // Tính số ngày mượn
+    for (int i = 0; i < dtoList.size(); i++) {
+      RentalTransaction entity = rentalTransactions.getContent().get(i);
+      RentalTransactionDisplayDto dto = dtoList.get(i);
+
+      if (entity.getDueDate() != null && entity.getCreatedDate() != null) {
+        long diffInMillies = entity.getDueDate().getTime() - entity.getCreatedDate().getTime();
+        long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
+        dto.setDaysBorrowed(diffInDays);
+      } else {
+        dto.setDaysBorrowed(null);
+      }
+    }
+
+    responseListDto.setContent(dtoList);
     responseListDto.setTotalElement(rentalTransactions.getTotalElements());
     responseListDto.setTotalPage(rentalTransactions.getTotalPages());
+
     apiMessageDto.setData(responseListDto);
     apiMessageDto.setMessage("Get list rental transaction success");
     return apiMessageDto;

@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/v1/book")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Slf4j
-public class BookController {
+public class BookController extends ABasicController{
   @Autowired
   BookRepository bookRepository;
 
@@ -126,6 +126,9 @@ public class BookController {
   @PreAuthorize("hasRole('BO_D')")
   @Transactional
   public ApiMessageDto<String> delete(@PathVariable("id") Long id) {
+    if (!isAdmin()){
+      throw new BadRequestException("Not allowed delete", ErrorCode.ACCOUNT_ERROR_UNAUTHORIZE);
+    }
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Book book = bookRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Book not found", ErrorCode.BOOK_ERROR_NOT_FOUND));

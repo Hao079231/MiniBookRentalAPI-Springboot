@@ -14,4 +14,6 @@ public class RentalTransactionDisplayDto {
   @JsonIgnoreProperties({"id", "email", "status"})
   private ReaderDtoForStaff reader;
   private Date dueDate;
+  private Integer state;
+  private Long daysBorrowed;
 }

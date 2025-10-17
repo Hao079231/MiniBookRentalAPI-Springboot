@@ -22,6 +22,7 @@ public interface RentalTransactionMapper {
   @Mapping(source = "staff", target = "staff", qualifiedByName = "fromEntityToProfileStaffDto")
   @Mapping(source = "reader", target = "reader", qualifiedByName = "fromEntityToReaderDtoForStaff")
   @Mapping(source = "dueDate", target = "dueDate")
+  @Mapping(source = "state", target = "state")
   @BeanMapping(ignoreByDefault = true)
   @Named("fromEntityToRentalDisplayDto")
   RentalTransactionDisplayDto fromEntityToRentalDisplayDto(RentalTransaction rentalTransaction);
