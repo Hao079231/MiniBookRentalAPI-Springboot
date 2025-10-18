@@ -18,6 +18,8 @@ import com.ute.rental.model.Group;
 import com.ute.rental.model.criteria.StaffCriteria;
 import com.ute.rental.repository.AccountRepository;
 import com.ute.rental.repository.GroupRepository;
+import com.ute.rental.repository.RentalTransactionRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +58,9 @@ public class StaffController extends ABasicController{
 
   @Autowired
   PasswordEncoder passwordEncoder;
+
+  @Autowired
+  RentalTransactionRepository rentalTransactionRepository;
 
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('S_C')")
@@ -151,6 +156,7 @@ public class StaffController extends ABasicController{
 
   @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('S_D')")
+  @Transactional
   public ApiMessageDto<String> delete(@PathVariable("id") Long id){
     if (!isAdmin()){
       throw new UnauthorizationException("Not allowed delete", ErrorCode.ACCOUNT_ERROR_UNAUTHORIZE);
@@ -158,6 +164,8 @@ public class StaffController extends ABasicController{
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Account account = accountRepository.findById(id).orElseThrow(()
     -> new NotFoundException("Account not found", ErrorCode.ACCOUNT_ERROR_NOT_FOUND));
+    // Cập nhật staff_id = null cho các rental transaction liên quan
+    rentalTransactionRepository.setStaffNullByStaffId(account.getId());
     accountRepository.delete(account);
     apiMessageDto.setMessage("Delete success");
     return apiMessageDto;
