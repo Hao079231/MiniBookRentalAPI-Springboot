@@ -13,8 +13,12 @@ import com.ute.rental.form.reader.UnblockReaderForm;
 import com.ute.rental.form.reader.UpdateReaderForm;
 import com.ute.rental.mapper.ReaderMapper;
 import com.ute.rental.model.Reader;
+import com.ute.rental.model.RentalTransaction;
 import com.ute.rental.model.criteria.ReaderCriteria;
 import com.ute.rental.repository.ReaderRepository;
+import com.ute.rental.repository.RentalDetailRepository;
+import com.ute.rental.repository.RentalTransactionRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +49,12 @@ public class ReaderController extends ABasicController{
 
   @Autowired
   ReaderMapper readerMapper;
+
+  @Autowired
+  RentalTransactionRepository rentalTransactionRepository;
+
+  @Autowired
+  RentalDetailRepository rentalDetailRepository;
 
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('R_C')")
@@ -119,17 +129,38 @@ public class ReaderController extends ABasicController{
 
   @DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('R_D')")
-  public ApiMessageDto<String> delete(@PathVariable("id") Long id){
-    if (!isAdmin()){
+  @Transactional
+  public ApiMessageDto<String> delete(@PathVariable("id") Long id) {
+    if (!isAdmin()) {
       throw new BadRequestException("Not allowed delete", ErrorCode.ACCOUNT_ERROR_UNAUTHORIZE);
     }
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    Reader reader = readerRepository.findById(id).orElseThrow(()
-    -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
+    Reader reader = readerRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
+
+    // Kiểm tra reader có giao dịch đang mượn không
+    if (rentalTransactionRepository.existsByReaderIdAndState(id, MiniBookConstant.RENTAL_STATE_RENTING)) {
+      throw new BadRequestException("reader is still borrowing", ErrorCode.RENTAL_TRANSACTION_ERROR_EXIST);
+    }
+
+    // Lấy tất cả rental transactions của reader này
+    List<RentalTransaction> transactions = rentalTransactionRepository.findAll(
+        (root, query, cb) -> cb.equal(root.get("reader").get("id"), id)
+    );
+
+    if (!transactions.isEmpty()) {
+      // Lấy danh sách transactionId để xóa rental detail
+      List<Long> transactionIds = transactions.stream().map(RentalTransaction::getId).toList();
+      // Xóa toàn bộ rental detail liên quan
+      rentalDetailRepository.deleteAllByRentalTransactionIdIn(transactionIds);
+      // Xóa toàn bộ rental transaction
+      rentalTransactionRepository.deleteAllInBatch(transactions);
+    }
     readerRepository.delete(reader);
-    apiMessageDto.setMessage("Delete success");
+    apiMessageDto.setMessage("Delete reader success");
     return apiMessageDto;
   }
+
 
   @PutMapping(value = "/unblock", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('R_UB')")

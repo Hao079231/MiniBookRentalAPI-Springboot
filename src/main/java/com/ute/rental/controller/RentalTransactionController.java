@@ -16,14 +16,20 @@ import com.ute.rental.form.rental.UpdateRentalTransaction;
 import com.ute.rental.mapper.RentalTransactionMapper;
 import com.ute.rental.model.Account;
 import com.ute.rental.model.Reader;
+import com.ute.rental.model.RentalDetail;
 import com.ute.rental.model.RentalTransaction;
 import com.ute.rental.model.criteria.RentalTransactionCriteria;
 import com.ute.rental.repository.AccountRepository;
+import com.ute.rental.repository.BookRepository;
 import com.ute.rental.repository.ReaderRepository;
+import com.ute.rental.repository.RentalDetailRepository;
 import com.ute.rental.repository.RentalTransactionRepository;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +63,12 @@ public class RentalTransactionController extends ABasicController{
 
   @Autowired
   ReaderRepository readerRepository;
+
+  @Autowired
+  RentalDetailRepository rentalDetailRepository;
+
+  @Autowired
+  BookRepository bookRepository;
 
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('RT_C')")
@@ -171,14 +183,40 @@ public class RentalTransactionController extends ABasicController{
 
   @PutMapping(value = "/complete", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('RT_CR')")
-  public ApiMessageDto<String> completeBookReturn(@Valid @RequestBody CompleteRentalTransaction request, BindingResult bindingResult){
+  @Transactional
+  public ApiMessageDto<String> completeBookReturn(@Valid @RequestBody CompleteRentalTransaction request,
+      BindingResult bindingResult) {
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    RentalTransaction rentalTransaction = rentalTransactionRepository.findById(request.getId()).orElseThrow(()
-    -> new NotFoundException("Rental transaction not found", ErrorCode.RENTAL_TRANSACTION_ERROR_NOT_FOUND));
+    RentalTransaction rentalTransaction = rentalTransactionRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("Rental transaction not found",
+            ErrorCode.RENTAL_TRANSACTION_ERROR_NOT_FOUND));
+
+    // Lấy tất cả rental detail kèm book trong 1 truy vấn duy nhất (JOIN FETCH)
+    List<RentalDetail> rentalDetails = rentalDetailRepository.findByRentalTransactionIdWithBook(rentalTransaction.getId());
+
+    if (rentalDetails.isEmpty()) {
+      throw new NotFoundException("No rental details found for this transaction",
+          ErrorCode.RENTAL_DETAIL_ERROR_NOT_FOUND);
+    }
+
+    // Gom nhóm số lượng mượn của từng bookId (tránh cập nhật trùng book)
+    Map<Long, Integer> stockChanges = new HashMap<>();
+    for (RentalDetail detail : rentalDetails) {
+      Long bookId = detail.getBook().getId();
+      stockChanges.merge(bookId, detail.getBookCount(), Integer::sum);
+    }
+
+    // Cập nhật tồn kho hàng loạt (bulk update)
+    stockChanges.forEach((bookId, count) -> {
+      bookRepository.updateStock(bookId, count);
+    });
+
     rentalTransaction.setState(MiniBookConstant.RENTAL_STATE_COMPLETE);
     rentalTransaction.setDueDate(new Date());
     rentalTransactionRepository.save(rentalTransaction);
-    apiMessageDto.setMessage("Complete book rental");
+
+    apiMessageDto.setMessage("Complete book rental success");
     return apiMessageDto;
   }
+
 }

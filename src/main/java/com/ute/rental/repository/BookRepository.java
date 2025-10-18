@@ -17,4 +17,9 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
   @Modifying
   @Query("UPDATE Book b SET b.category = NULL WHERE b.category.id = :categoryId")
   void removeCategoryId(@Param("categoryId") Long categoryId);
+
+  @Modifying
+  @Query("UPDATE Book b SET b.stock = b.stock + :count WHERE b.id = :bookId")
+  void updateStock(@Param("bookId") Long bookId, @Param("count") Integer count);
+
 }
