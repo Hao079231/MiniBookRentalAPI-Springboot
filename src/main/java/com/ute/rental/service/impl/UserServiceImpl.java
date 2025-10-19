@@ -11,6 +11,7 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.ute.rental.config.SecurityConstant;
+import com.ute.rental.constant.MiniBookConstant;
 import com.ute.rental.dto.ApiMessageDto;
 import com.ute.rental.dto.AuthenticationDto;
 import com.ute.rental.dto.ErrorCode;
@@ -91,6 +92,9 @@ public class UserServiceImpl{
 
       if (!authenticated){
         throw new BadRequestException("Password invalid", ErrorCode.ACCOUNT_ERROR_PASSWORD);
+      }
+      if (!Objects.equals(account.getGroup().getKind(), MiniBookConstant.KIND_ADMIN)){
+        throw new UnauthorizationException("Access denied", ErrorCode.ACCOUNT_ERROR_UNAUTHORIZE);
       }
       authenticationDto.setToken(generateToken(account));
     } else if (Objects.equals(request.getGrantType().toLowerCase(), SecurityConstant.STAFF)){

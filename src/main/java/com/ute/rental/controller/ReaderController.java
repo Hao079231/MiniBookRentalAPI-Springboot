@@ -137,6 +137,9 @@ public class ReaderController extends ABasicController{
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Reader reader = readerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Reader not found", ErrorCode.READER_ERROR_NOT_FOUND));
+    if (Objects.equals(reader.getStatus(), MiniBookConstant.READER_STATUS_ACTIVE)){
+      throw new BadRequestException("Reader is active", ErrorCode.READER_ERROR_ACTIVED);
+    }
 
     // Kiểm tra reader có giao dịch đang mượn không
     if (rentalTransactionRepository.existsByReaderIdAndState(id, MiniBookConstant.RENTAL_STATE_RENTING)) {
